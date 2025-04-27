@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,17 +42,21 @@ class _MyNoteState extends State<MyNote>{
   setState(() {
   });
 }
-Future<void> captureImageFromCamera() async {
-  final XFile? photo = await picker.pickImage(source: ImageSource.camera);
-  
-  if (photo != null) {
-    pickedImage = File(photo.path);
-    imageBytes=await pickedImage!.readAsBytes();
-    // Update UI or process the image
+  Future<void> _captureImage() async {
+    try {
+      final image = await picker.pickImage(source:ImageSource.camera);
+      if (image != null) {
+        pickedImage=File(image.path);
+          imageBytes=await pickedImage!.readAsBytes();
+        setState(() {
+        });// Use the image file here
+        print('Image captured: ${image.path}');
+      }
+    } catch (e) {
+      print('Error capturing image: $e');
+    }
   }
-    setState(() {
-  });
-}
+
 
 late Map args;
 @override
@@ -238,7 +240,7 @@ dialouge(BuildContext context){
                               ),
                                 InkWell(
                                   onTap: () {
-                                    captureImageFromCamera();
+                                    _captureImage();
                                     Navigator.pop(context);
                                   },
                                 child: Container(
@@ -261,4 +263,8 @@ dialouge(BuildContext context){
                     );
                                     
 }
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }
