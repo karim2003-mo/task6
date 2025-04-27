@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     double screenwidth = MediaQuery.of(context).size.width;
-    double screenheight = MediaQuery.of(context).size.width;
+    double screenheight = MediaQuery.of(context).size.height;
     StdFontSize fontsize = StdFontSize(screenwidth: screenwidth);
 
     return Scaffold(
@@ -83,7 +83,7 @@ class _MainPageState extends State<MainPage> {
                                           child: Material(
                                               child: Container(
                                               width: screenwidth /1.2,
-                                              height: screenheight,
+                                              height: screenheight/3,
                                               decoration: BoxDecoration(
                                                 color: Colors.white
                                               ),
@@ -170,7 +170,7 @@ class _MainPageState extends State<MainPage> {
                                   child: Column(
                                     children: [
                                       SizedBox(
-                                        height: screenheight / 4,
+                                        height: screenheight / 8,
                                         child: Image.asset(
                                           foldersdata![index]["foldershapepath"],
                                         ),
@@ -228,7 +228,7 @@ class _MainPageState extends State<MainPage> {
                                           ),
                                         ),
                                         width: screenwidth / 1.5,
-                                        height: screenheight / 1,
+                                        height: screenheight / 3,
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,

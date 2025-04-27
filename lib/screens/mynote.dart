@@ -28,6 +28,8 @@ class _MyNoteState extends State<MyNote>{
     note=allnotes.firstWhere((element) => element['id']==id); // Move getdata call here
     if(is_setstate){
     setState(() {
+    _titlecontroller.text=note!['title']??"";
+    _notecontroller.text=note!['note']??"";
     });
     }
   }
@@ -47,9 +49,11 @@ Future<void> captureImageFromCamera() async {
   
   if (photo != null) {
     pickedImage = File(photo.path);
-
+    imageBytes=await pickedImage!.readAsBytes();
     // Update UI or process the image
   }
+    setState(() {
+  });
 }
 
 late Map args;
@@ -66,14 +70,11 @@ void initState() {
   @override
   Widget build(BuildContext context) {
     double screenwidth = MediaQuery.of(context).size.width;
-    double screenheight = MediaQuery.of(context).size.width;
+    double screenheight = MediaQuery.of(context).size.height;
     StdFontSize fontsize = StdFontSize(screenwidth: screenwidth);
-    if(note!=null){
-    _titlecontroller.text=note!['title']??"";
-    _notecontroller.text=note!['note']??"";
-    }
+    print(screenheight);
     return Scaffold(
-                  appBar: AppBar(
+        appBar: AppBar(
         backgroundColor: Color.fromRGBO(175, 219, 255, 1),
         title: Text(
           note?['notename']??"......",
@@ -85,113 +86,120 @@ void initState() {
         ),
       ),
       body: Padding(padding:EdgeInsets.only(top: 50,right: 5,left: 5),
-      child: Center(
-        child:(note!=null)? Container(
-          child: Stack(
-            children: [
-              Align(alignment: Alignment.topRight,
-              child: ElevatedButton(onPressed: () async{
-                // ignore: unused_local_variable
-                final res=await _db.updateNote(query:'UPDATE notes SET image = ? , title = ? , note = ? WHERE notename = ?',
-                updated: [imageBytes??note!['image'],_titlecontroller.text,_notecontroller.text,args['notename']]
-                );
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  duration: Duration(seconds: 2), // 2 seconds
-                  behavior: SnackBarBehavior.floating, // Makes it float above content
-                  content: Text("contet has been saved successfully")));
-              }, child: Text("Save")),
-              ),
-              Align(
-                alignment: Alignment.topLeft,
-                child:(pickedImage==null&&note!['image']==null)? InkWell(
-                  onTap: (){
-                    dialouge(context);
-                  },
-                  child: DottedBorder(
-                            color: Colors.blue,
-                            strokeWidth: 2,
-                            borderType: BorderType.RRect,
-                            radius: Radius.circular(10),
-                            dashPattern: [6, 3],
-                            child: Container(
-                              width: 150,
-                              height: 150,
-                              alignment: Alignment.center,
-                              child:Container(width:30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(50)
+        child:(note!=null)? SingleChildScrollView(
+          child: Container(
+            height: screenheight,
+            child: Stack(
+              children: [
+                Align(alignment: Alignment.topRight,
+                child: ElevatedButton(onPressed: () async{
+                  // ignore: unused_local_variable
+                  final res=await _db.updateNote(query:'UPDATE notes SET image = ? , title = ? , note = ? WHERE notename = ?',
+                  updated: [imageBytes??note!['image'],_titlecontroller.text,_notecontroller.text,args['notename']]
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    duration: Duration(seconds: 2), // 2 seconds
+                    behavior: SnackBarBehavior.floating, // Makes it float above content
+                    content: Text("contet has been saved successfully")));
+                }, child: Text("Save")),
+                ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child:(pickedImage==null&&note!['image']==null)? InkWell(
+                    onTap: (){
+                      dialouge(context);
+                    },
+                    child: DottedBorder(
+                              color: Colors.blue,
+                              strokeWidth: 2,
+                              borderType: BorderType.RRect,
+                              radius: Radius.circular(10),
+                              dashPattern: [6, 3],
+                              child: Container(
+                                width: 150,
+                                height: 150,
+                                alignment: Alignment.center,
+                                child:Container(width:30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(50)
+                                ),
+                                child: Icon(Icons.add),
+                                )
                               ),
-                              child: Icon(Icons.add),
-                              )
                             ),
-                          ),
-                ):(note!['image']==null)?InkWell(
-                  onLongPress: (){
-                    dialouge(context);
-                  },
-
-                  child: Container(
-                    width: screenwidth/2,
-                    height: screenheight/1.5,
-                    child: Image.file(pickedImage!,fit: BoxFit.cover,)),
-                ):
-                  InkWell(
+                  ):(note!['image']==null||pickedImage!=null)?InkWell(
                     onLongPress: (){
                       dialouge(context);
                     },
-                    child: Container(
-                      width: screenwidth/2.25,
-                    height:screenheight/1.5 ,
-                    child: Image.memory(note!['image'],fit: BoxFit.fill,)),
-                  )
-              ),
-              Align(
-                alignment: Alignment(0.9, -0.8),
-                child: Container(
-                  width: screenwidth/2.5,
-                  child: TextField(
-                    controller: _titlecontroller,
-                    style: TextStyle(
-                      fontSize: fontsize.medium,
-                      fontWeight: FontWeight.w600
+          
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth:screenwidth/2),
+                      child: Container(
+                        height: screenheight/4,
+                        child: Image.file(pickedImage!,fit: BoxFit.fill,)),
                     ),
-                      maxLines: null,
-                      maxLength: 100, // Allows unlimited lines
-                      decoration: InputDecoration(
-                      enabledBorder: InputBorder.none,
-                      border:InputBorder.none ,
-                      hintText: "Add Tittle",
-                      hintStyle: TextStyle(
-                        color: Colors.grey[400]
+                  ):
+                    InkWell(
+                      onLongPress: (){
+                        dialouge(context);
+                      },
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth:screenwidth/2),
+                        child: Container(
+                        height:screenheight/4 ,
+                        child: Image.memory(note!['image'],fit: BoxFit.fill,)),
+                      ),
+                    )
+                ),
+                Align(
+                  alignment: Alignment(0.9, -0.8),
+                  child: Container(
+                    width: screenwidth/2.5,
+                    child: TextField(
+                      textInputAction: TextInputAction.done,
+                      controller: _titlecontroller,
+                      style: TextStyle(
+                        fontSize: fontsize.medium,
+                        fontWeight: FontWeight.w600
+                      ),
+                        maxLines: null,
+                        maxLength: 100, // Allows unlimited lines
+                        decoration: InputDecoration(
+                        enabledBorder: InputBorder.none,
+                        border:InputBorder.none ,
+                        hintText: "Add Tittle",
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400]
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),Align(
-                alignment: Alignment(0, 0.2),
-                child: Container(
-                  width: double.infinity,
-                  height: screenheight/2,
-                  child:TextField(
-                    maxLines: null,
-                    controller: _notecontroller,
-                      decoration: InputDecoration(
-                      enabledBorder: InputBorder.none,
-                      border:InputBorder.none ,
-                      hintText: "Add Note",
-                      hintStyle: TextStyle(
-                        color: Colors.grey[400]
+                ),Align(
+                  alignment: Alignment(0, 0.2),
+                  child: Container(
+                    width: double.infinity,
+                    height: screenheight/2,
+                    child:TextField(
+                      textInputAction: TextInputAction.done,
+                      maxLines: null,
+                      controller: _notecontroller,
+                        decoration: InputDecoration(
+                        enabledBorder: InputBorder.none,
+                        border:InputBorder.none ,
+                        hintText: "Add Note",
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400]
+                        ),
                       ),
-                    ),
-                  ) ,
-                ),
-              )
-            ],
+                    ) ,
+                  ),
+                )
+              ],
+            ),
           ),
-        ):CircularProgressIndicator(),
-      ),
+        ):Center(child:CircularProgressIndicator()),
       ),
     );
   }

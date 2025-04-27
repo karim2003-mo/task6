@@ -58,7 +58,8 @@ class InitDataBase{
   }
   Future<List<Map<String, dynamic>>> getAlldata({required String table}) async{
     final db = await database;
-    return await db.query(table);
+    return await db.query(table,
+    );
   }
   Future<List<Map<String, dynamic>>> getRecordsByIds({required String table,required List<int> ids}) async {
   final db = await database;
